@@ -82,6 +82,7 @@
       return false; // fixme
 
       //CHANGE
+      //CHANGE 2
     },
 
     // test if any rows on this board contain conflicts
