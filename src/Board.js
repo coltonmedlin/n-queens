@@ -80,6 +80,8 @@
     // test if a specific row on this board contains a conflict
     hasRowConflictAt: function(rowIndex) {
       return false; // fixme
+
+      //CHANGE
     },
 
     // test if any rows on this board contain conflicts
