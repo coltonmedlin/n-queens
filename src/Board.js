@@ -62,7 +62,7 @@
     },
 
 
-/*
+    /*
          _             _     _
      ___| |_ __ _ _ __| |_  | |__   ___ _ __ ___ _
     / __| __/ _` | '__| __| | '_ \ / _ \ '__/ _ (_)
@@ -79,15 +79,30 @@
     //
     // test if a specific row on this board contains a conflict
     hasRowConflictAt: function(rowIndex) {
-      return false; // fixme
-
-      //CHANGE
-      //CHANGE 2
+      let row = this.attributes[rowIndex];
+      //loop through the row
+      let num = 0;
+      for (let i = 0; i < row.length; i++) {
+        //check for 1 -- mark true
+        if (row[i] === 1) {
+          num++;
+          //if we hit a second 1 return the index
+        } if (num === 2) {
+          return i;
+        }
+      }
     },
 
     // test if any rows on this board contain conflicts
     hasAnyRowConflicts: function() {
-      return false; // fixme
+      //loop through each row
+      for (row in this.attributes) {
+        //run the has conflicts function
+        if (this.hasRowConflictAt(row) !== undefined) {
+          return true;
+        }
+      }
+      return false;
     },
 
 
@@ -97,12 +112,27 @@
     //
     // test if a specific column on this board contains a conflict
     hasColConflictAt: function(colIndex) {
-      return false; // fixme
+      // Define a row length variable to get the number of columns
+      let num = 0;
+      // Check each row at its column index for pieces
+      for (let row in this.attributes) {
+        if (this.attributes[row][colIndex] === 1) {
+          num++;
+        } if (num === 2) {
+          return row;
+        }
+      }
+      //If there is more than 1, return the location of the 2nd.
     },
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
-      return false; // fixme
+      for (let i = 0; i < this.attributes[0].length; i++) {
+        if (this.hasColConflictAt(i)) {
+          return true;
+        }
+      }
+      return false;
     },
 
 
