@@ -63,35 +63,37 @@
 
     //UTILITY METHODS
     findLastPiece: function() {
-      //find the last piece
-      //ADDING TOO MANY PIECES AND NOT REMOVING??
-      debugger;
-      let row = this.attributes.n - 1;
-      console.log(row);
-      for (row; row > -1; row--) {
-        for (let i = this.attributes[row].length; i > -1; i--) {
-          let spot = this.attributes[row][i];
-          if (spot === 1) {
-            return [row, i];
+      let last;
+      for (row in this.attributes) {
+        if (row !== 'n') {
+          for (let i = 0; i < this.attributes[row].length; i++) {
+            if (this.attributes[row][i] === 1) {
+              last = [row, i];
+            }
           }
         }
       }
-      return false;
+      return last ? last : false;
     },
 
     setNextPiece: function() {
       //find the last piece
       let [row, col] = this.findLastPiece();
       //set a piece right next to it
+      //Last colum in the current row condition
       if (this.attributes[row][col + 1] === undefined) {
-        if (row === this.attributes.n - 1) {
-          return;
+        // Last row on the board condition
+        if (parseInt(row) === this.attributes.n - 1) {
+          return false;
         }
-        this.attributes[row + 1][0] = 1;
+        //not the last row on the board condition
+        this.attributes[parseInt(row) + 1][0] = 1;
+        //not the last column in the current row condition
       } else {
         this.attributes[row][col + 1] = 1;
       }
       let context = this;
+
       const fixPiece = function(context) {
         if (!context.hasAnyQueensConflicts()) {
           return true;
@@ -99,19 +101,68 @@
           let position = context.findLastPiece();
           let [row, col] = position;
           context.attributes[row][col] = 0;
+          // Last spot in the current row condition
           if (context.attributes[row][col + 1] === undefined) {
-            context.attributes[row + 1][0] = 1;
+            // Also the last row in the board condition
+            if (context.attributes[parseInt(row) + 1] === undefined) {
+              return false;
+            }
+            context.attributes[parseInt(row) + 1][0] = 1;
           } else {
             context.attributes[row][col + 1] = 1;
           }
-          fixPiece(context);
+          return fixPiece(context);
         }
       };
       return fixPiece(context);
     },
 
+    // setNextPiece: function() {
+    //   //find the last piece
+    //   let [row, col] = this.findLastPiece();
+    //   console.log(row, col);
+    //   console.log(col + 1);
+    //   //check if this is the last spot
+    //   if (this.attributes[row][col + 1] === undefined) {
+    //     if (parseInt(row) === this.attributes.n - 1) {
+    //       return false;
+    //     }
+    //   }
+    //   this.attributes[row][col] = 0;
+
+    //   //set the next piece
+    //   row = parseInt(row);
+    //   row++;
+    //   this.attributes[row][0] === 1;
+
+    //   let context = this;
+
+    //   const fixPiece = function(context) {
+    //     if (!context.hasAnyQueensConflicts()) {
+    //       return true;
+    //     } else {
+    //       let position = context.findLastPiece();
+    //       let [row, col] = position;
+    //       context.attributes[row][col] = 0;
+    //       // Last spot in the current row condition
+    //       if (context.attributes[row][col + 1] === undefined) {
+    //         // Also the last row in the board condition
+    //         if (context.attributes[parseInt(row) + 1] === undefined) {
+    //           return false;
+    //         }
+    //         context.attributes[parseInt(row) + 1][0] = 1;
+    //       } else {
+    //         context.attributes[row][col + 1] = 1;
+    //       }
+    //       return fixPiece(context);
+    //     }
+    //   };
+
+    //   return fixPiece(context);
+    // },
+
     moveLastPiece: function() {
-      console.log('HERE MOFOS');
+      //No other pieces on the board
       if (!this.findLastPiece()) {
         console.log('here');
         return false;
@@ -119,25 +170,28 @@
       //Can only run if we find a last piece
       let [row, col] = this.findLastPiece();
       //let lastSpot = [this.attributes.n, this.attributes.n];
+
+      // End of current row condition
       if (this.attributes[row][col + 1] === undefined) {
-        if (row === this.attributes.n - 1) {
+
+        // Also Last Row Condition
+        if (parseInt(row) === this.attributes.n - 1) {
           this.attributes[row][col] = 0;
           return this.moveLastPiece();
         }
-        this.attributes[row + 1][0] = 1;
+        this.attributes[row][col] = 0;
+        this.attributes[parseInt(row) + 1][0] = 1;
       } else {
+        this.attributes[row][col] = 0;
         this.attributes[row][col + 1] = 1;
       }
       if (this.hasAnyQueensConflicts()) {
-        this.moveLastPiece();
+        return this.moveLastPiece();
       } else {
         return true;
       }
     },
 
-    //RECURSIVE - the board is failing
-    //BASE - the board is passing
-    //BASE - the board has one piece at the last spot
 
     returnMatrix: function() {
       let result = [];
@@ -147,6 +201,20 @@
         }
       }
       return result;
+    },
+
+    countPieces: function() {
+      let counter = 0;
+      for (row in this.attributes) {
+        if (row === 'n') {
+          return counter;
+        }
+        for (let i = 0; i < this.attributes[row].length; i++) {
+          if (this.attributes[row][i] === 1) {
+            counter++;
+          }
+        }
+      }
     },
     /*
          _             _     _
@@ -213,6 +281,9 @@
 
     // test if any columns on this board contain conflicts
     hasAnyColConflicts: function() {
+      if (this.attributes[0] === undefined) {
+        return false;
+      }
       for (let i = 0; i < this.attributes[0].length; i++) {
         if (this.hasColConflictAt(i)) {
           return true;
@@ -266,6 +337,9 @@
 
     // test if any major diagonals on this board contain conflicts
     hasAnyMajorDiagonalConflicts: function() {
+      if (this.attributes[0] === undefined) {
+        return false;
+      }
       for (let i = 0; i < this.attributes[0].length; i++) {
         if (this.hasMajorDiagonalConflictAt(i) !== undefined) {
           return true;
@@ -324,6 +398,9 @@
 
     // test if any minor diagonals on this board contain conflicts
     hasAnyMinorDiagonalConflicts: function() {
+      if (this.attributes[0] === undefined) {
+        return false;
+      }
       for (let i = 0; i < this.attributes[0].length; i++) {
         if (this.hasMinorDiagonalConflictAt(i) !== undefined) {
           return true;

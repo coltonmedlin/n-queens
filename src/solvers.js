@@ -60,7 +60,6 @@ window.countNRooksSolutions = function(n) {
 
 // return a matrix (an array of arrays) representing a single nxn chessboard, with n queens placed such that none of them can attack each other
 window.findNQueensSolution = function(n) {
-  debugger;
   if (n === 0) {
     return {'n': 0};
   }
@@ -68,38 +67,74 @@ window.findNQueensSolution = function(n) {
   let board = new Board({'n': n});
   //place pice one (at 0, 0)
   board.attributes[0][0] = 1;
-  //create a pieces counter
-  let remainingPieces = n - 1;
-  let pieces = 1;
+  let pieceCounter = 1;
 
   const innerFunc = function(board) {
     //place a piece at the next availible spot
-    if (board.setNextPiece()) {
-      pieces++;
-      remainingPieces--;
+    let passingBoard = board.setNextPiece();
+    while (passingBoard && pieceCounter < n) {
+      passingBoard = board.setNextPiece();
+      pieceCounter = board.countPieces();
     }
     //BASE CASE - board with all pieces placed and passes (return the board)
-    if (board.hasAnyQueensConflicts() === false && pieces === n) {
+    if (board.hasAnyQueensConflicts() === false && pieceCounter === n) {
       return board.returnMatrix();
     }
     //BASE CASE - board with one piece at the last spot (return undefined)
     if (!board.moveLastPiece()) {
       return;
     }
-    //RECURSIVE - board has less than n pieces and has no queen conflics && remianing pieces is > 0
+    //RECURSIVE - board has less than n pieces and has no queen conflics
     return innerFunc(board);
   };
+
   let solution = innerFunc(board);
 
 
 
   console.log('Single solution for ' + n + ' queens:', JSON.stringify(solution));
+  if (solution === undefined) {
+    solution = {'n': n};
+  }
   return solution;
 };
 
 // return the number of nxn chessboards that exist, with n queens placed such that none of them can attack each other
 window.countNQueensSolutions = function(n) {
-  var solutionCount = 0;
+  let solutionCount = 0;
+
+  if (n === 0) {
+    return 1;
+  }
+
+  //make a board (empty)
+  let board = new Board({'n': n});
+  //place pice one (at 0, 0)
+  board.attributes[0][0] = 1;
+  let pieceCounter = 1;
+
+  const innerFunc = function(board) {
+    //place a piece at the next availible spot
+    let passingBoard = board.setNextPiece();
+    while (passingBoard && pieceCounter < n) {
+      passingBoard = board.setNextPiece();
+      pieceCounter = board.countPieces();
+    }
+    //BASE CASE - board with all pieces placed and passes (return the board)
+    pieceCounter = board.countPieces();
+    if (board.hasAnyQueensConflicts() === false && pieceCounter === n) {
+      solutionCount++;
+    }
+    //BASE CASE - board with one piece at the last spot (return undefined)
+    if (!board.moveLastPiece()) {
+      return solutionCount;
+    }
+    //RECURSIVE - board has less than n pieces and has no queen conflics
+    return innerFunc(board);
+  };
+
+  innerFunc(board);
+
 
   console.log('Number of solutions for ' + n + ' queens:', solutionCount);
   return solutionCount;
