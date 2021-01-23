@@ -8,9 +8,9 @@
 
     initialize: function (params) {
       if (_.isUndefined(params) || _.isNull(params)) {
-        console.log('Good guess! But to use the Board() constructor, you must pass it an argument in one of the following formats:');
-        console.log('\t1. An object. To create an empty board of size n:\n\t\t{n: %c<num>%c} - Where %c<num> %cis the dimension of the (empty) board you wish to instantiate\n\t\t%cEXAMPLE: var board = new Board({n:5})', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: grey;');
-        console.log('\t2. An array of arrays (a matrix). To create a populated board of size n:\n\t\t[ [%c<val>%c,%c<val>%c,%c<val>%c...], [%c<val>%c,%c<val>%c,%c<val>%c...], [%c<val>%c,%c<val>%c,%c<val>%c...] ] - Where each %c<val>%c is whatever value you want at that location on the board\n\t\t%cEXAMPLE: var board = new Board([[1,0,0],[0,1,0],[0,0,1]])', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: grey;');
+        // console.log('Good guess! But to use the Board() constructor, you must pass it an argument in one of the following formats:');
+        // console.log('\t1. An object. To create an empty board of size n:\n\t\t{n: %c<num>%c} - Where %c<num> %cis the dimension of the (empty) board you wish to instantiate\n\t\t%cEXAMPLE: var board = new Board({n:5})', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: grey;');
+        // console.log('\t2. An array of arrays (a matrix). To create a populated board of size n:\n\t\t[ [%c<val>%c,%c<val>%c,%c<val>%c...], [%c<val>%c,%c<val>%c,%c<val>%c...], [%c<val>%c,%c<val>%c,%c<val>%c...] ] - Where each %c<val>%c is whatever value you want at that location on the board\n\t\t%cEXAMPLE: var board = new Board([[1,0,0],[0,1,0],[0,0,1]])', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: blue;', 'color: black;', 'color: grey;');
       } else if (params.hasOwnProperty('n')) {
         this.set(makeEmptyMatrix(this.get('n')));
       } else {
@@ -61,7 +61,93 @@
       );
     },
 
+    //UTILITY METHODS
+    findLastPiece: function() {
+      //find the last piece
+      //ADDING TOO MANY PIECES AND NOT REMOVING??
+      debugger;
+      let row = this.attributes.n - 1;
+      console.log(row);
+      for (row; row > -1; row--) {
+        for (let i = this.attributes[row].length; i > -1; i--) {
+          let spot = this.attributes[row][i];
+          if (spot === 1) {
+            return [row, i];
+          }
+        }
+      }
+      return false;
+    },
 
+    setNextPiece: function() {
+      //find the last piece
+      let [row, col] = this.findLastPiece();
+      //set a piece right next to it
+      if (this.attributes[row][col + 1] === undefined) {
+        if (row === this.attributes.n - 1) {
+          return;
+        }
+        this.attributes[row + 1][0] = 1;
+      } else {
+        this.attributes[row][col + 1] = 1;
+      }
+      let context = this;
+      const fixPiece = function(context) {
+        if (!context.hasAnyQueensConflicts()) {
+          return true;
+        } else {
+          let position = context.findLastPiece();
+          let [row, col] = position;
+          context.attributes[row][col] = 0;
+          if (context.attributes[row][col + 1] === undefined) {
+            context.attributes[row + 1][0] = 1;
+          } else {
+            context.attributes[row][col + 1] = 1;
+          }
+          fixPiece(context);
+        }
+      };
+      return fixPiece(context);
+    },
+
+    moveLastPiece: function() {
+      console.log('HERE MOFOS');
+      if (!this.findLastPiece()) {
+        console.log('here');
+        return false;
+      }
+      //Can only run if we find a last piece
+      let [row, col] = this.findLastPiece();
+      //let lastSpot = [this.attributes.n, this.attributes.n];
+      if (this.attributes[row][col + 1] === undefined) {
+        if (row === this.attributes.n - 1) {
+          this.attributes[row][col] = 0;
+          return this.moveLastPiece();
+        }
+        this.attributes[row + 1][0] = 1;
+      } else {
+        this.attributes[row][col + 1] = 1;
+      }
+      if (this.hasAnyQueensConflicts()) {
+        this.moveLastPiece();
+      } else {
+        return true;
+      }
+    },
+
+    //RECURSIVE - the board is failing
+    //BASE - the board is passing
+    //BASE - the board has one piece at the last spot
+
+    returnMatrix: function() {
+      let result = [];
+      for (row in this.attributes) {
+        if (row !== 'n') {
+          result.push(this.attributes[row]);
+        }
+      }
+      return result;
+    },
     /*
          _             _     _
      ___| |_ __ _ _ __| |_  | |__   ___ _ __ ___ _
